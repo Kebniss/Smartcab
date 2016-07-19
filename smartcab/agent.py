@@ -40,21 +40,7 @@ class LearningAgent(Agent):
         
         # TODO: Select action according to your policy
         
-        self.k += 1
-        epsilon = 1/self.k
-        rnd = random.uniform(0,1)
-        actions = [None, 'forward', 'left', 'right', self.next_waypoint]
-
-        if rnd <= epsilon:
-            action = actions[random.randint(0,4)]
-        else: 
-            max_q = None
-            action = self.next_waypoint
-            for act in actions[0:3]:
-                q_value_s_a = self.q_table.get((self.state, act))
-                if q_value_s_a is not None and q_value_s_a > max_q:
-                    max_q = q_value_s_a
-                    action = act
+        action = get_action(self.k, self.next_waypoint, self.q_table, self.state)
 
         # print "\n"
         # print "state: ", self.state
@@ -87,6 +73,26 @@ class LearningAgent(Agent):
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
+
+def get_action(k, next_waypoint, q_table, state):
+    """ Applies epsilon-greedy algorithm and returns the action to take. """
+    k += 1
+    epsilon = 1/k
+    rnd = random.uniform(0,1)
+    actions = [None, 'forward', 'left', 'right', next_waypoint]
+
+    if rnd <= epsilon:
+        action = actions[random.randint(0,4)]
+    else: 
+        max_q = None
+        action = next_waypoint
+        for act in actions[0:3]:
+            q_value_s_a = q_table.get((state, act))
+            if q_value_s_a is not None and q_value_s_a > max_q:
+                max_q = q_value_s_a
+                action = act
+
+    return action
 
 def run():
     """Run the agent for a finite number of trials."""

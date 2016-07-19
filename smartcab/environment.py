@@ -247,7 +247,7 @@ class Agent(object):
 
 
 class DummyAgent(Agent):
-    color_choices = ['blue', 'cyan', 'magenta', 'orange']
+    color_choices = ['blue', 'cyan', 'orange', 'green']
 
     def __init__(self, env):
         super(DummyAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color

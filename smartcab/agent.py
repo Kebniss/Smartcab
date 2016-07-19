@@ -38,7 +38,14 @@ class LearningAgent(Agent):
         self.state = (tuple_inputs, deadline)
         
         # TODO: Select action according to your policy
-        action = self.next_waypoint
+        epsilon = 0.4
+        rnd = random.uniform(0,1)
+        actions = [None, 'forward', 'left', 'right']
+
+        if rnd < epsilon:
+            action = actions[random.randint(0,3)]
+        else: 
+            action = self.next_waypoint
 
         # print "\n"
         # print "state: ", self.state
@@ -82,7 +89,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.5, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=1, display=True)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials

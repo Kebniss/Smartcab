@@ -14,6 +14,7 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.state = ()
         self.q_table = dict()
+        self.k = 0
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -38,14 +39,22 @@ class LearningAgent(Agent):
         self.state = (tuple_inputs, deadline)
         
         # TODO: Select action according to your policy
-        epsilon = 0.4
+        
+        self.k += 1
+        epsilon = 1/self.k
         rnd = random.uniform(0,1)
-        actions = [None, 'forward', 'left', 'right']
+        actions = [None, 'forward', 'left', 'right', self.next_waypoint]
 
-        if rnd < epsilon:
-            action = actions[random.randint(0,3)]
+        if rnd <= epsilon:
+            action = actions[random.randint(0,4)]
         else: 
+            max_q = None
             action = self.next_waypoint
+            for act in actions[0:3]:
+                q_value_s_a = self.q_table.get((self.state, act))
+                if q_value_s_a is not None and q_value_s_a > max_q:
+                    max_q = q_value_s_a
+                    action = act
 
         # print "\n"
         # print "state: ", self.state
@@ -89,7 +98,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=1, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials

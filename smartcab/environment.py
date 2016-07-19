@@ -9,6 +9,8 @@ class TrafficLight(object):
 
     valid_states = [True, False]  # True = NS open, False = EW open
 
+    # traffic light is always open in one of the two directions and maintans that state for a period of
+    # time that is defined randomly
     def __init__(self, state=None, period=None):
         self.state = state if state is not None else random.choice(self.valid_states)
         self.period = period if period is not None else random.choice([3, 4, 5])
@@ -26,6 +28,7 @@ class TrafficLight(object):
 class Environment(object):
     """Environment within which all agents operate."""
 
+    # The inputs are defined relatively to the position of the agent not with a global perspective
     valid_actions = [None, 'forward', 'left', 'right']
     valid_inputs = {'light': TrafficLight.valid_states, 'oncoming': valid_actions, 'left': valid_actions, 'right': valid_actions}
     valid_headings = [(1, 0), (0, -1), (-1, 0), (0, 1)]  # ENWS
@@ -136,9 +139,14 @@ class Environment(object):
         oncoming = None
         left = None
         right = None
+        # for each other agent and its state
         for other_agent, other_state in self.agent_states.iteritems():
+            # check if they are at the same intersection of my agent (ignore myagent)
             if agent == other_agent or location != other_state['location'] or (heading[0] == other_state['heading'][0] and heading[1] == other_state['heading'][1]):
+                # if not continue
                 continue
+            # if yes then check where they want to go. The whole block below does some magic to assign 
+            # a meaningful value to other_heading
             other_heading = other_agent.get_next_waypoint()
             if (heading[0] * other_state['heading'][0] + heading[1] * other_state['heading'][1]) == -1:
                 if oncoming != 'left':  # we don't want to override oncoming == 'left'
@@ -156,6 +164,7 @@ class Environment(object):
         return self.agent_states[agent]['deadline'] if agent is self.primary_agent else None
 
     def act(self, agent, action):
+        # checks move and assigns rewards
         assert agent in self.agent_states, "Unknown agent!"
         assert action in self.valid_actions, "Invalid action!"
 

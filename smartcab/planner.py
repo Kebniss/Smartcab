@@ -1,3 +1,4 @@
+# it is what, given a position tells me where to go
 import random
 
 class RoutePlanner(object):

@@ -63,21 +63,21 @@ class LearningAgent(Agent):
         gamma = 0
 
         if self.q_table.get((self.state, action)) is None:
-            self.q_table((self.state, action)) = 0
+            self.q_table[(self.state, action)] = 0
 
         max_q = None
         next_action = 'noAction'
         for act in ['None', 'left', 'forward', 'right']:
-            q_value_s_a = q_table.get((next_state, act))
+            q_value_s_a = self.q_table.get((next_state, act))
             if q_value_s_a is not None and q_value_s_a > max_q:
                 max_q = q_value_s_a
                 next_action = act
         
         if next_action == 'noAction':
-            self.q_table((next_state, next_action)) = 0
+            self.q_table[(next_state, next_action)] = 0
 
-        self.q_table((self.state, action)) = (1 - alpha) * self.q_table((self.state, acion)) + alpha * (
-                                            reward + gamma * self.q_table((next_state, next_action)))
+        self.q_table[(self.state, action)] = (1 - alpha) * self.q_table.get((self.state, action)) + alpha * (
+                                            reward + gamma * self.q_table.get((next_state, next_action)))
 
        
         # check if the agent reached the destination

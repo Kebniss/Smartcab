@@ -74,7 +74,7 @@ class LearningAgent(Agent):
                 next_action = act
         
         if next_action == 'noAction':
-            self.q_table(next_state, next_action)) = 0
+            self.q_table((next_state, next_action)) = 0
 
         self.q_table((self.state, action)) = (1 - alpha) * self.q_table((self.state, acion)) + alpha * (
                                             reward + gamma * self.q_table((next_state, next_action)))

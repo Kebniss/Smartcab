@@ -3,6 +3,7 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 from collections import namedtuple
+from pandas import value_counts
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -15,12 +16,15 @@ class LearningAgent(Agent):
         self.state = ()
         self.q_table = dict()
         self.k = 0
+        self.outcomes = []
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
+        self.k += 1
         self.state = ()
         self.next_waypoint = None
+        self.outcomes += [False]
 
 
     def update(self, t):
@@ -30,16 +34,9 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
-        State = namedtuple('State', ['light', 'oncoming', 'left', 'right'])
-        
-        # print "State: ", State
-        # print "Inputs: ", inputs 
-        tuple_inputs = State(inputs['light'], inputs['oncoming'], inputs['left'], inputs['right'])
-        # print "tuple_inputs: ", tuple_inputs
-        self.state = (tuple_inputs, deadline)
+        self.state = get_state(inputs, deadline)
         
         # TODO: Select action according to your policy
-        
         action = get_action(self.k, self.next_waypoint, self.q_table, self.state)
 
         # print "\n"
@@ -50,8 +47,13 @@ class LearningAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
 
+        new_inputs = self.env.sense(self)
+        new_deadline = self.env.get_deadline(self)
+        new_state = get_state(new_inputs, new_deadline)
+
         # TODO: Learn policy based on state, action, reward
         if not self.q_table:
+            # create the dict
             self.q_table = dict.fromkeys([self.state, action])
             # print "\n"
             # print "dict:", self.q_table.keys()
@@ -70,13 +72,31 @@ class LearningAgent(Agent):
             # print "other"
             # print "reward:", self.q_table[(self.state, action)]
             # print "\n"
+        # check if the agent reached the destination
+        location = self.env.agent_states[self]["location"]
+        destination = self.env.agent_states[self]["destination"]
+        if location == destination:
+            self.outcomes[-1] = True
+
+        # when the end of the simulation is reached print overall success rate
+        end = 100 # number of trials defined in run
+        if self.k == end:
+            successes = value_counts(self.outcomes)[True]
+            succ_rate = (successes * 1.0) / len(self.outcomes)
+            print "\nSuccess rate: {}".format(succ_rate)
+            print "\n"
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+
+def get_state(inputs, deadline):
+    
+    State = namedtuple('State', ['light', 'oncoming', 'left', 'right'])
+    tuple_inputs = State(inputs['light'], inputs['oncoming'], inputs['left'], inputs['right'])
+    return(tuple_inputs, deadline)
 
 
 def get_action(k, next_waypoint, q_table, state):
     """ Applies epsilon-greedy algorithm and returns the action to take. """
-    k += 1
     epsilon = 1/k
     rnd = random.uniform(0,1)
     actions = [None, 'forward', 'left', 'right', next_waypoint]
@@ -100,7 +120,7 @@ def run():
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent - through this the agent gets a random location and heading = 0,1
-    e.set_primary_agent(a, enforce_deadline=False)  # specify agent to track
+    e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it

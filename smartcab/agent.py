@@ -47,37 +47,37 @@ class LearningAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
 
-        next_inputs = self.env.sense(self)
-        next_deadline = self.env.get_deadline(self)
-        next_state = get_state(next_inputs, next_deadline)
+        # next_inputs = self.env.sense(self)
+        # next_deadline = self.env.get_deadline(self)
+        # next_state = get_state(next_inputs, next_deadline)
 
-        # TODO: Learn policy based on state, action, reward
-        if not self.q_table:
-            # create the dict
-            self.q_table = dict.fromkeys([self.state, action])
-            # print "\n"
-            # print "dict:", self.q_table.keys()
-            # print "\n"
+        # # TODO: Learn policy based on state, action, reward
+        # if not self.q_table:
+        #     # create the dict
+        #     self.q_table = dict.fromkeys([self.state, action])
+        #     # print "\n"
+        #     # print "dict:", self.q_table.keys()
+        #     # print "\n"
 
-        alpha = 0.6
-        gamma = 0.9
+        # alpha = 0.6
+        # gamma = 0.9
 
-        if self.q_table.get((self.state, action)) is None:
-            self.q_table[(self.state, action)] = 0
+        # if self.q_table.get((self.state, action)) is None:
+        #     self.q_table[(self.state, action)] = 0
 
-        max_q = None
-        next_action = 'noAction'
-        for act in ['None', 'left', 'forward', 'right']:
-            q_value_s_a = self.q_table.get((next_state, act))
-            if q_value_s_a is not None and q_value_s_a > max_q:
-                max_q = q_value_s_a
-                next_action = act
+        # max_q = None
+        # next_action = 'noAction'
+        # for act in ['None', 'left', 'forward', 'right']:
+        #     q_value_s_a = self.q_table.get((next_state, act))
+        #     if q_value_s_a is not None and q_value_s_a > max_q:
+        #         max_q = q_value_s_a
+        #         next_action = act
         
-        if next_action == 'noAction':
-            self.q_table[(next_state, next_action)] = 0
+        # if next_action == 'noAction':
+        #     self.q_table[(next_state, next_action)] = 0
 
-        self.q_table[(self.state, action)] = (1 - alpha) * self.q_table.get((self.state, action)) + alpha * (
-                                            reward + gamma * self.q_table.get((next_state, next_action)))
+        # self.q_table[(self.state, action)] = (1 - alpha) * self.q_table.get((self.state, action)) + alpha * (
+        #                                     reward + gamma * self.q_table.get((next_state, next_action)))
 
        
         # check if the agent reached the destination
@@ -105,20 +105,24 @@ def get_state(inputs, deadline):
 
 def get_action(k, next_waypoint, q_table, state):
     """ Applies epsilon-greedy algorithm and returns the action to take. """
-    epsilon = 1/k
-    rnd = random.uniform(0,1)
-    actions = [None, next_waypoint] # , 'forward', 'left', 'right'
 
-    if rnd <= epsilon:
-        action = actions[random.randint(0,1)]
-    else: 
-        max_q = None
-        action = next_waypoint
-        for act in ['None', 'forward', 'left', 'right']:
-            q_value_s_a = q_table.get((state, act))
-            if q_value_s_a is not None and q_value_s_a > max_q:
-                max_q = q_value_s_a
-                action = act
+    actions = [None, 'forward', 'left', 'right']
+    action = actions[random.randint(0,3)]
+    return action
+    # epsilon = 1/k
+    # rnd = random.uniform(0,1)
+    # actions = [None, next_waypoint] # , 'forward', 'left', 'right'
+
+    # if rnd <= epsilon:
+    #     action = actions[random.randint(0,1)]
+    # else: 
+    #     max_q = None
+    #     action = next_waypoint
+    #     for act in ['None', 'forward', 'left', 'right']:
+    #         q_value_s_a = q_table.get((state, act))
+    #         if q_value_s_a is not None and q_value_s_a > max_q:
+    #             max_q = q_value_s_a
+    #             action = act
 
     return action
 
@@ -128,7 +132,7 @@ def run():
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent - through this the agent gets a random location and heading = 0,1
-    e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
+    e.set_primary_agent(a, enforce_deadline=False)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it

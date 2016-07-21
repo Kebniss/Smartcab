@@ -59,8 +59,8 @@ class LearningAgent(Agent):
             # print "dict:", self.q_table.keys()
             # print "\n"
 
-        alpha = 0.5
-        gamma = 0
+        alpha = 0.6
+        gamma = 0.9
 
         if self.q_table.get((self.state, action)) is None:
             self.q_table[(self.state, action)] = 0
@@ -107,14 +107,14 @@ def get_action(k, next_waypoint, q_table, state):
     """ Applies epsilon-greedy algorithm and returns the action to take. """
     epsilon = 1/k
     rnd = random.uniform(0,1)
-    actions = [None, 'forward', 'left', 'right', next_waypoint]
+    actions = [None, next_waypoint] # , 'forward', 'left', 'right'
 
     if rnd <= epsilon:
-        action = actions[random.randint(0,4)]
+        action = actions[random.randint(0,1)]
     else: 
         max_q = None
         action = next_waypoint
-        for act in actions[0:3]:
+        for act in ['None', 'forward', 'left', 'right']:
             q_value_s_a = q_table.get((state, act))
             if q_value_s_a is not None and q_value_s_a > max_q:
                 max_q = q_value_s_a

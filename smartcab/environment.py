@@ -46,15 +46,15 @@ class Environment(object):
         self.block_size = 100
         self.intersections = OrderedDict()
         self.roads = []
-        for x in xrange(self.bounds[0], self.bounds[2] + 1):
-            for y in xrange(self.bounds[1], self.bounds[3] + 1):
+        for x in xrange(self.bounds[0], self.bounds[2] + 1): # from 1 to 8
+            for y in xrange(self.bounds[1], self.bounds[3] + 1): # from 1 to 6
                 self.intersections[(x, y)] = TrafficLight()  # a traffic light at each intersection
 
         for a in self.intersections:
             for b in self.intersections:
                 if a == b:
                     continue
-                if (abs(a[0] - b[0]) + abs(a[1] - b[1])) == 1:  # L1 distance = 1
+                if (abs(a[0] - b[0]) + abs(a[1] - b[1])) == 1:  # L1 distance = 1 avoid creation of diagonal roads
                     self.roads.append((a, b))
 
         # Dummy agents
@@ -172,8 +172,8 @@ class Environment(object):
         location = state['location']
         heading = state['heading']
         light = 'green' if (self.intersections[location].state and heading[1] != 0) or ((not self.intersections[location].state) and heading[0] != 0) else 'red'
-        sense = self.sense(agent)
-
+        sense = self.sense(agent
+)
         # Move agent if within bounds and obeys traffic rules
         reward = 0  # reward/penalty
         move_okay = True

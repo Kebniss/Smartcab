@@ -7,6 +7,7 @@ from pandas import value_counts
 from math import log
 from numpy import concatenate,array
 import matplotlib.pyplot as plt
+import pickle
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -111,19 +112,22 @@ class LearningAgent(Agent):
                 print "Not optimal moves: {}".format(self.not_optimal)
                 print "\n"
 
-                plt.figure()
-                plt.plot(range(0,100), self.errors, 'r-')
-                plt.xlabel('Cycles')
-                plt.ylabel('Errors')
-                plt.title('Errors per cycle')
-                plt.show()
+                with open('rep1.pickle', 'w') as f:
+                    pickle.dump([succ_rate, self.efficiency, self.errors, self.not_optimal])
 
-                plt.figure()
-                plt.plot(range(0,100), self.not_optimal, 'r-')
-                plt.xlabel('Cycles')
-                plt.ylabel('Errors')
-                plt.title('Errors per cycle')
-                plt.show()
+                # plt.figure()
+                # plt.plot(range(0,100), self.errors, 'r-')
+                # plt.xlabel('Cycles')
+                # plt.ylabel('Errors')
+                # plt.title('Errors per cycle')
+                # plt.show()
+
+                # plt.figure()
+                # plt.plot(range(0,100), self.not_optimal, 'r-')
+                # plt.xlabel('Cycles')
+                # plt.ylabel('Errors')
+                # plt.title('Errors per cycle')
+                # plt.show()
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 

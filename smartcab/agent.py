@@ -4,7 +4,7 @@ from planner import RoutePlanner
 from simulator import Simulator
 from collections import namedtuple
 from pandas import value_counts
-from math import log
+from math import log,exp
 from numpy import concatenate,array
 import matplotlib.pyplot as plt
 import pickle
@@ -112,22 +112,11 @@ class LearningAgent(Agent):
                 print "Not optimal moves: {}".format(self.not_optimal)
                 print "\n"
 
-                with open('rep1.pickle', 'w') as f:
-                    pickle.dump([succ_rate, self.efficiency, self.errors, self.not_optimal])
+                summary = {'Success_rate': succ_rate, 'Efficiency': self.efficiency, 
+                        'Errors': self.errors, 'Not_optimal_moves': self.not_optimal}
+                with open('rep9.pkl', 'wb') as f:
+                    pickle.dump(summary, f, pickle.HIGHEST_PROTOCOL)
 
-                # plt.figure()
-                # plt.plot(range(0,100), self.errors, 'r-')
-                # plt.xlabel('Cycles')
-                # plt.ylabel('Errors')
-                # plt.title('Errors per cycle')
-                # plt.show()
-
-                # plt.figure()
-                # plt.plot(range(0,100), self.not_optimal, 'r-')
-                # plt.xlabel('Cycles')
-                # plt.ylabel('Errors')
-                # plt.title('Errors per cycle')
-                # plt.show()
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
@@ -148,7 +137,7 @@ def get_action(k, next_waypoint, q_table, state):
     
     actions = [None, 'forward', 'left', 'right'] 
     # action = actions[random.randint(0,3)]
-    epsilon = 1/log(k+2) 
+    epsilon = exp(-k/57)
     rnd = random.uniform(0,3)
 
     if rnd <= epsilon:

@@ -94,13 +94,13 @@ class LearningAgent(Agent):
             next_action = actions[random.randint(0,3)]
             self.q_table[(next_state, next_action)] = 0
 
-        alpha = exp(-self.t/200) 
+        alpha = exp(-self.t/40) 
         gamma = 0.9
 
         self.q_table[(self.state, action)] = (1 - alpha) * self.q_table.get((self.state, action)) + alpha * (
                                             reward + gamma * self.q_table.get((next_state, next_action))) 
 
-        end = 1000 # number of trials defined in run
+        end = 100 # number of trials defined in run
         # check if the agent reached the destination
         location = self.env.agent_states[self]["location"]
         destination = self.env.agent_states[self]["destination"]
@@ -138,7 +138,7 @@ def get_action(k, next_waypoint, q_table, state):
     
     actions = [None, 'forward', 'left', 'right'] 
 #    action = actions[random.randint(0,3)]
-    epsilon = exp(-k/200)
+    epsilon = exp(-k/40)
     rnd = random.uniform(0,3)
 
     if rnd <= epsilon:
@@ -167,7 +167,7 @@ def run():
     sim = Simulator(e, update_delay=0, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    sim.run(n_trials=1000)  # run for a specified number of trials
+    sim.run(n_trials=100)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 

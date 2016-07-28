@@ -56,10 +56,11 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         self.state = get_state(inputs, self.next_waypoint)
+
         
         # TODO: Select action according to your policy
         action = get_action(self.t, self.next_waypoint, self.q_table, self.state)
-
+       
         # Execute action and get reward
         reward = self.env.act(self, action)
 
@@ -69,34 +70,37 @@ class LearningAgent(Agent):
             self.not_optimal[-1] += 1
 
         next_inputs = self.env.sense(self)
-        next_state = get_state(next_inputs)
+        new_next_waypoint = self.planner.next_waypoint()
+        next_state = get_state(next_inputs, new_next_waypoint)
 
         # TODO: Learn policy based on state, action, reward
         if not self.q_table:
             # create the dict
             self.q_table = dict.fromkeys([self.state, action])
 
-        alpha = 1/log(self.t+2) 
-        gamma = 0.9
-
         if self.q_table.get((self.state, action)) is None:
             self.q_table[(self.state, action)] = 0
 
         max_q = None
         next_action = 'noAction'
-        for act in ['None', 'left', 'forward', 'right']:
+        actions = [None, 'left', 'forward', 'right']
+        for act in actions:
             q_value_s_a = self.q_table.get((next_state, act))
             if q_value_s_a is not None and q_value_s_a > max_q:
                 max_q = q_value_s_a
                 next_action = act
         
         if next_action == 'noAction':
+            next_action = actions[random.randint(0,3)]
             self.q_table[(next_state, next_action)] = 0
+
+        alpha = exp(-self.t/200) 
+        gamma = 0.9
 
         self.q_table[(self.state, action)] = (1 - alpha) * self.q_table.get((self.state, action)) + alpha * (
                                             reward + gamma * self.q_table.get((next_state, next_action))) 
 
-        end = 100 # number of trials defined in run
+        end = 1000 # number of trials defined in run
         # check if the agent reached the destination
         location = self.env.agent_states[self]["location"]
         destination = self.env.agent_states[self]["destination"]
@@ -120,15 +124,12 @@ class LearningAgent(Agent):
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
-def get_state(*args):
+def get_state(inputs, next_waypoint):
     """ Transforms inputs from dict to named tuple"""
-    inputs = args[0] 
+    #inputs = args[0] 
     State = namedtuple('State', ['light', 'oncoming', 'left', 'right'])
     tuple_inputs = State(inputs['light'], inputs['oncoming'], inputs['left'], inputs['right'])
-    if enumerate(args) == 1:
-        return tuple_inputs
-    else:
-        return(tuple_inputs, args[1:])
+    return tuple_inputs, next_waypoint
 
 
 def get_action(k, next_waypoint, q_table, state):
@@ -136,8 +137,8 @@ def get_action(k, next_waypoint, q_table, state):
 
     
     actions = [None, 'forward', 'left', 'right'] 
-    # action = actions[random.randint(0,3)]
-    epsilon = exp(-k/57)
+#    action = actions[random.randint(0,3)]
+    epsilon = exp(-k/200)
     rnd = random.uniform(0,3)
 
     if rnd <= epsilon:
@@ -166,7 +167,7 @@ def run():
     sim = Simulator(e, update_delay=0, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    sim.run(n_trials=100)  # run for a specified number of trials
+    sim.run(n_trials=1000)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 
